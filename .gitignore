@@ -1,0 +1,6 @@
+# vim .swp files
+*.swp
+
+# packer variable files
+variable*.json
+*.pkrvars.hcl
