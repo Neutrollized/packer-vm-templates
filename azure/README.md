@@ -1,7 +1,7 @@
 # README
 Before you can begin to build with Packer on Azure, you will need to create a service principal with `client_id` and `client_secret`.  You can do that either from the Portal (except if you won't find "service principals", you create them under "App registrations"...) or you can create them from command-line:
 
-`az ad sp create-for-rbac --name Packer --query "{ client_id: appId, client_secret: password, tenant_id: tenant }"
+`az ad sp create-for-rbac --name Packer --query "{ client_id: appId, client_secret: password, tenant_id: tenant }"`
 
 ## Useful `az` commands
 - [`az vm image list`](https://docs.microsoft.com/en-us/cli/azure/vm/image?view=azure-cli-latest#az_vm_image_list)
