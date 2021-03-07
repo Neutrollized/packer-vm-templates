@@ -42,6 +42,7 @@ echo '+ adding entry in /etc/fstab'
 echo "/dev/mapper/${ORADATA_VG}-${ORADATA_LV}  ${ORADATA_MNT_PT}  xfs  defaults  0 0" >> /etc/fstab
 mkdir -p ${ORADATA_MNT_PT}
 mount -a
+chown -R oracle:oinstall ${ORADATA_MNT_PT}
 
 echo '+ complete!' 
 exit 0
