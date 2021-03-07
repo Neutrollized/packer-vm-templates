@@ -31,14 +31,15 @@ echo ' + partitioning device'
   mkpart primary linux-swap 0% 100%
 
 echo ' + making swap device' 
+sleep 3
 /usr/sbin/mkswap /dev/${SWAP_DEV}1
 
 echo ' + enabling swap device' 
+sleep 3
 /usr/sbin/swapon /dev/${SWAP_DEV}1
 
 
 echo '+ getting device uuid' 
-# needs to wait a bit for the disk UUID to show
 sleep 3
 SWAP_DEV_UUID=$(ls -lha /dev/disk/by-uuid | grep ${SWAP_DEV}1 | awk '{ print $9 }')
 echo "UUID: ${SWAP_DEV_UUID}"

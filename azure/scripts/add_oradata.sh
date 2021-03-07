@@ -23,6 +23,7 @@ echo ' + partitioning device'
   mkpart primary 0% 100%
 
 echo '  + making pv' 
+sleep 3
 /usr/sbin/pvcreate /dev/${ORADATA_DEV}1
 
 echo '  + making vg' 
