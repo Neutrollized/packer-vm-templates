@@ -12,14 +12,12 @@ Before you can begin to build with Packer on Azure, you will need to create a se
 
 where my **variables.pkrvars.hcl** file would be something like:
 ```
-oracle_version = "18c"
-
 client_id       = "abcdefgh-1234-5678-9012-abcdefghijkl"
 client_secret   = "mySup3rS3cre7!"
 subscription_id = "12345678-abcd-efgh-ijkl-1234567890ab"
 tenant_id       = "zyxwvuts-9876-5432-1098-zyxwvutsrqpo"
 
-managed_image_resource_group_name = "mystorageaccount-rg"
+managed_image_rg_name = "mystorageaccount-rg"
 ```
 
 

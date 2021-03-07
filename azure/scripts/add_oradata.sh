@@ -7,16 +7,11 @@ if [[ ${EUID} -ne 0 ]]; then
   exit 1
 fi
 
-yum list installed | grep oracle-database-preinstall > /dev/null 2>&1
-if [[ $? -ne 0 ]]; then
-  echo "You're missing some prerequisite packages"
-  exit 2
-fi
 
-
-ORADATA_SIZE="${1:-512G}"
+ORADATA_SIZE="${1:-256G}"
 ORADATA_VG='oraclevg'
 ORADATA_LV='oradatalv'
+ORADATA_MNT_PT='/opt/oracle/oradata'
 
 
 echo '+ finding device name' 
@@ -37,12 +32,14 @@ echo '  + making lv'
 /usr/sbin/lvcreate -l 95%FREE -n ${ORADATA_LV} ${ORADATA_VG}
 
 echo '   + making filesystem' 
-/usr/sbin/mkfs.ext4 /dev/${ORADATA_VG}/${ORADATA_LV}
+/usr/sbin/mkfs.xfs /dev/${ORADATA_VG}/${ORADATA_LV}
 
 
 echo '+ adding entry in /etc/fstab' 
-echo "/dev/mapper/${ORADATA_VG}-${ORADATA_LV}  /opt/oracle/oradata  ext4  defaults,barrier=0  0 0" >> /etc/fstab
-mkdir -p /opt/oracle/oradata
+#echo "/dev/mapper/${ORADATA_VG}-${ORADATA_LV}  ${ORADATA_MNT_PT}  ext4  defaults,barrier=0  0 0" >> /etc/fstab
+# nobarrier mount option for xfs was deprecated in kernel 4.13 back in late 2017
+echo "/dev/mapper/${ORADATA_VG}-${ORADATA_LV}  ${ORADATA_MNT_PT}  xfs  defaults  0 0" >> /etc/fstab
+mkdir -p ${ORADATA_MNT_PT}
 mount -a
 
 echo '+ complete!' 

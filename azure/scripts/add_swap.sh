@@ -11,8 +11,8 @@ elif [[ $(/usr/sbin/swapon -s | wc -l) -gt 0 ]]; then
 fi
 
 
-# for databases *up to* 16G memory, swap should match memory
-# for databases with 16G memory or more, swap should be 16G
+# between 8G and 16G memory, swap should match memory
+# more 16G memory, swap should be 16G
 SWAP_SIZE="${1:-16G}"
 
 

@@ -6,6 +6,10 @@ variable "client_secret" {}
 variable "subscription_id" {}
 variable "tenant_id" {}
 variable "managed_image_rg_name" {}
+variable "oracle_version" {}
+variable "custom_managed_image_name" {}
+variable "custom_managed_image_rg_name" {}
+
 
 locals {
   # https://www.packer.io/docs/templates/hcl_templates/functions/datetime/formatdate
@@ -21,19 +25,13 @@ source "azure-arm" "oracle-base" {
   tenant_id       = var.tenant_id
 
   # will be saved as a managed image rather than in your storage account
-  managed_image_name                 = "ol7_base-${local.datestamp}"
+  managed_image_name                 = "ol7_oracle${var.oracle_version}-${local.datestamp}"
   managed_image_resource_group_name  = var.managed_image_rg_name
   managed_image_storage_account_type = "Premium_LRS"
 
-  # get list from:
-  # az vm image list --publisher Oracle --offer Oracle-Linux --location CanadaCentral --all
-  os_type         = "Linux"
-  image_publisher = "Oracle"
-  image_offer     = "Oracle-Linux"
-  image_sku       = "ol79-lvm"
-
-  communicator = "ssh"
-  ssh_timeout  = "30m"
+  os_type                                  = "Linux"
+  custom_managed_image_name                = var.custom_managed_image_name
+  custom_managed_image_resource_group_name = var.custom_managed_image_rg_name
 
   azure_tags = {
     dept = "engineering"
@@ -42,51 +40,24 @@ source "azure-arm" "oracle-base" {
   # get list of avail vm sizes in your location:
   # az vm list-sizes --location CanadaCentral
   location = "CanadaCentral"
-  vm_size  = "Standard_B2s"
+  vm_size  = "Standard_D2s_v3"
 }
 
 build {
   sources = ["sources.azure-arm.oracle-base"]
 
-  provisioner "file" {
-    destination = "/tmp/"
-    source      = "scripts/add_swap.sh"
-  }
-
-  provisioner "file" {
-    destination = "/tmp/"
-    source      = "scripts/add_oradata.sh"
-  }
-
   provisioner "shell" {
     inline = [
-      "sudo mv /tmp/add_swap.sh /root/.",
-      "sudo mv /tmp/add_oradata.sh /root/."
-    ]
-  }
-
-
-  provisioner "shell" {
-    inline = [
-      "sudo yum -y update"
-    ]
-  }
-
-  # use "valid_exit_codes" various disconnect error codes
-  # even though you put in "expect_disconnect" as that's not 100% reliable 
-  provisioner "shell" {
-    expect_disconnect   = "true"
-    start_retry_timeout = "15m"
-    valid_exit_codes    = [0, 143, 2300218]
-    inline = [
-      "sudo reboot"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "sudo yum -y install compat-libcap1 compat-libstdc++-33",
+      "sudo yum -y install oracle-database-preinstall-${var.oracle_version}",
       "sudo yum clean all"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
+      "wget --directory-prefix=/tmp/ https://download.oracle.com/otn-pub/otn_software/db-express/oracle-database-xe-18c-1.0-1.x86_64.rpm",
+      "sudo yum -y localinstall /tmp/oracle-database-xe-18c-1.0-1.x86_64.rpm",
+      "rm /tmp/oracle-database-xe-18c-1.0-1.x86_64.rpm"
     ]
   }
 
