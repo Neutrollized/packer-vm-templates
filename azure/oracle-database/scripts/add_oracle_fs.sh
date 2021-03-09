@@ -14,21 +14,15 @@ ORA_LV_ARRAY=('u01lv' 'logslv' 'mirrorlv' 'archivelv')
 ORA_LV_SIZE_ARRAY=('16G' '16G' '16G' '50G')
 ORA_MNT_ARRAY=('/u01' '/logs' '/mirror_logs' '/archive_logs')
 
+
 # array size assertion
 if [[ (${#ORA_LV_ARRAY[@]} -ne ${#ORA_LV_SIZE_ARRAY[@]}) || (${#ORA_LV_ARRAY[@]} -ne ${#ORA_MNT_ARRAY[@]}) ]]; then
   echo "There's a mismatch in your array sizes"
   exit 2
 fi
 
-
 echo '+ finding device name'
-# I do this to bypass the unicode character in the output of lsblk sometimes
-for i in $(lsblk -o NAME,SIZE | grep sd | grep -v "sd[a||b]" | grep ${ORA_SIZE} | awk '{ print $1 }' | sort); do
-  echo ${i} | tail -c 5 | head -c 3 >> /tmp/lsblk_oradev.txt
-  echo '' >> /tmp/lsblk_oradev.txt
-done
-
-ORA_DEV=$(uniq -u /tmp/lsblk_oradev.txt)
+ORA_DEV=$(lsblk -o NAME,SIZE | grep sd | grep -v "sd[a||b]" | grep ${ORA_SIZE} | awk '{ print $1 }' | grep -v -E '[0-9]$' | head -n 1)
 
 echo ' + partitioning device'
 /usr/sbin/parted --align optimal /dev/${ORA_DEV} \
@@ -38,9 +32,9 @@ echo ' + partitioning device'
 echo '  + making pv'
 sleep 3
 /usr/sbin/pvcreate /dev/${ORA_DEV}1
+
 echo '  + making vg'
 /usr/sbin/vgcreate ${ORA_VG} /dev/${ORA_DEV}1
-
 
 i=0
 while [[ $i -lt ${#ORA_LV_ARRAY[@]} ]]; do
@@ -55,7 +49,5 @@ while [[ $i -lt ${#ORA_LV_ARRAY[@]} ]]; do
   i=$(( i+1 ))
 done
 
-
 mount -a
-rm /tmp/lsblk_oradev.txt
 echo '+ complete!'
