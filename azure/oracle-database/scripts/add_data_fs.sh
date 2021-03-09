@@ -15,7 +15,13 @@ ORADATA_MNT_PT='/data'
 
 
 echo '+ finding device name' 
-ORADATA_DEV=$(lsblk -o NAME,SIZE | grep ${ORADATA_SIZE} | awk '{ print $1 }')
+# I do this to bypass the unicode character in the output of lsblk sometimes
+for i in $(lsblk -o NAME,SIZE | grep sd | grep ${ORADATA_SIZE} | awk '{ print $1 }' | sort); do
+  echo ${i} | tail -c 5 | head -c 3 >> /tmp/lsblk_datadev.txt
+  echo '' >> /tmp/lsblk_datadev.txt
+done
+
+ORADATA_DEV=$(uniq -u /tmp/lsblk_datadev.txt)
 
 echo ' + partitioning device' 
 /usr/sbin/parted --align optimal /dev/${ORADATA_DEV} \
@@ -41,4 +47,5 @@ mkdir -p ${ORADATA_MNT_PT}
 
 
 mount -a
+rm /tmp/lsblk_datadev.txt
 echo '+ complete!' 

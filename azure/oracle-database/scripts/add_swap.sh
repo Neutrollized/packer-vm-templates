@@ -18,7 +18,7 @@ SWAP_SIZE="${1:-16G}"
 
 echo '+ finding device name' 
 # I do this to bypass the unicode character in the output of lsblk sometimes
-for i in $(lsblk -o NAME,SIZE | grep ${SWAP_SIZE} | awk '{ print $1 }' | sort); do
+for i in $(lsblk -o NAME,SIZE | grep sd | grep ${SWAP_SIZE} | awk '{ print $1 }' | sort); do
   echo ${i} | tail -c 5 | head -c 3 >> /tmp/lsblk_swapdev.txt
   echo '' >> /tmp/lsblk_swapdev.txt
 done
@@ -30,17 +30,20 @@ echo ' + partitioning device'
   mklabel msdos \
   mkpart primary linux-swap 0% 100%
 
+echo ' + waiting for swap partition UUID...' >> /tmp/bootstrap.log
+while [[ $(ls -lha /dev/disk/by-uuid/ | grep "${SWAP_DEV}1" | wc -l) -ne 1 ]]; do
+  echo '  + waiting...' >> /tmp/bootstrap.log
+  sleep 1
+done
+
 echo ' + making swap device' 
-sleep 3
 /usr/sbin/mkswap /dev/${SWAP_DEV}1
 
 echo ' + enabling swap device' 
-sleep 3
 /usr/sbin/swapon /dev/${SWAP_DEV}1
 
 
 echo '+ getting device uuid' 
-sleep 3
 SWAP_DEV_UUID=$(ls -lha /dev/disk/by-uuid | grep ${SWAP_DEV}1 | awk '{ print $9 }')
 echo "UUID: ${SWAP_DEV_UUID}"
 
@@ -48,6 +51,5 @@ echo ' + adding entry in /etc/fstab'
 echo "UUID=${SWAP_DEV_UUID}  swap  swap  defaults  0 0" >> /etc/fstab
 
 
-echo '+ complete!' 
 rm /tmp/lsblk_swapdev.txt
-exit 0
+echo '+ complete!' 

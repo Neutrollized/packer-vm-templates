@@ -14,7 +14,7 @@ ORA_LV_ARRAY=('u01lv' 'logslv' 'mirrorlv' 'archivelv')
 ORA_LV_SIZE_ARRAY=('16G' '16G' '16G' '50G')
 ORA_MNT_ARRAY=('/u01' '/logs' '/mirror_logs' '/archive_logs')
 
-# arrray size assertion
+# array size assertion
 if [[ (${#ORA_LV_ARRAY[@]} -ne ${#ORA_LV_SIZE_ARRAY[@]}) || (${#ORA_LV_ARRAY[@]} -ne ${#ORA_MNT_ARRAY[@]}) ]]; then
   echo "There's a mismatch in your array sizes"
   exit 2
@@ -22,7 +22,13 @@ fi
 
 
 echo '+ finding device name'
-ORA_DEV=$(lsblk -o NAME,SIZE | grep ${ORA_SIZE} | awk '{ print $1 }')
+# I do this to bypass the unicode character in the output of lsblk sometimes
+for i in $(lsblk -o NAME,SIZE | grep sd | grep ${ORA_SIZE} | awk '{ print $1 }' | sort); do
+  echo ${i} | tail -c 5 | head -c 3 >> /tmp/lsblk_oradev.txt
+  echo '' >> /tmp/lsblk_oradev.txt
+done
+
+ORA_DEV=$(uniq -u /tmp/lsblk_oradev.txt)
 
 echo ' + partitioning device'
 /usr/sbin/parted --align optimal /dev/${ORA_DEV} \
@@ -51,4 +57,5 @@ done
 
 
 mount -a
+rm /tmp/lsblk_oradev.txt
 echo '+ complete!'
