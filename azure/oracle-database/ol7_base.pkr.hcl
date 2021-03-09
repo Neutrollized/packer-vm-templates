@@ -55,13 +55,19 @@ build {
 
   provisioner "file" {
     destination = "/tmp/"
-    source      = "scripts/add_oradata.sh"
+    source      = "scripts/add_oracle_fs.sh"
+  }
+
+  provisioner "file" {
+    destination = "/tmp/"
+    source      = "scripts/add_data_fs.sh"
   }
 
   provisioner "shell" {
     inline = [
       "sudo mv /tmp/add_swap.sh /root/.",
-      "sudo mv /tmp/add_oradata.sh /root/."
+      "sudo mv /tmp/add_oracle_fs.sh /root/.",
+      "sudo mv /tmp/add_data_fs.sh /root/."
     ]
   }
 

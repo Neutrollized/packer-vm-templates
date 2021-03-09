@@ -9,9 +9,9 @@ fi
 
 
 ORADATA_SIZE="${1:-256G}"
-ORADATA_VG='oraclevg'
-ORADATA_LV='oradatalv'
-ORADATA_MNT_PT='/opt/oracle/oradata'
+ORADATA_VG='oradatavg'
+ORADATA_LV='datalv'
+ORADATA_MNT_PT='/data'
 
 
 echo '+ finding device name' 
@@ -25,24 +25,20 @@ echo ' + partitioning device'
 echo '  + making pv' 
 sleep 3
 /usr/sbin/pvcreate /dev/${ORADATA_DEV}1
-
 echo '  + making vg' 
 /usr/sbin/vgcreate ${ORADATA_VG} /dev/${ORADATA_DEV}1
 
 echo '  + making lv' 
 /usr/sbin/lvcreate -l 95%FREE -n ${ORADATA_LV} ${ORADATA_VG}
-
 echo '   + making filesystem' 
 /usr/sbin/mkfs.xfs /dev/${ORADATA_VG}/${ORADATA_LV}
 
 
 echo '+ adding entry in /etc/fstab' 
-#echo "/dev/mapper/${ORADATA_VG}-${ORADATA_LV}  ${ORADATA_MNT_PT}  ext4  defaults,barrier=0  0 0" >> /etc/fstab
 # nobarrier mount option for xfs was deprecated in kernel 4.13 back in late 2017
 echo "/dev/mapper/${ORADATA_VG}-${ORADATA_LV}  ${ORADATA_MNT_PT}  xfs  defaults  0 0" >> /etc/fstab
 mkdir -p ${ORADATA_MNT_PT}
-mount -a
-chown -R oracle:oinstall ${ORADATA_MNT_PT}
 
+
+mount -a
 echo '+ complete!' 
-exit 0

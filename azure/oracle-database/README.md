@@ -1,14 +1,24 @@
 # README
+At the time of writing, there's no managed Oracle database service on Azure, and the Oracle provided images from the Azure Marketplace have really poor ratings and reviews.  So if you are going to be running Oracle DB on Azure, it's likely you'll have to roll your own.  
+
+#### So why are there 3 image builds?
+The one I would recommend (especially if you're going to be deploying with [Terraform](https://www.terraform.io/), is the "Base CI" one, in which a lot of the heavy lifting with regards to the setup of swap, file systems, etc. will be done via `custom_data` from within the **azurerm_linux_virtual_machine** resource.  
+
+The "Base" and the "Oracle DB" files are your more traditional layered approach to image building where you build a base image upon which you layer on addition components.  I'm also leaving it in there because getting the the reboot provision step to not fail/error was a lot more work than I anticipated (`expect_disconnect` doesn't seem to work for Azure VMs the same way they do in GCP and AWS -- and it was frustationg AF).
+ 
+
+## Prerequisites / Setup
 Before you can begin to build with Packer on Azure, you will need to create a service principal with `client_id` and `client_secret`.  You can do that either from the Portal (except if you won't find "service principals", you create them under "App registrations"...) or you can create them from command-line:
 
 `az ad sp create-for-rbac --name Packer --query "{ client_id: appId, client_secret: password, tenant_id: tenant }"`
 
-## Useful `az` commands
+### Useful `az` commands
 - [`az vm image list`](https://docs.microsoft.com/en-us/cli/azure/vm/image?view=azure-cli-latest#az_vm_image_list)
 - [`az vm list-sizes`](https://docs.microsoft.com/en-us/cli/azure/vm?view=azure-cli-latest#az_vm_list_sizes)
 
+
 ## Sample usage
-`packer build -var-file=variables.pkrvars.hcl ol7_base.pkr.hcl`
+`packer build -var-file=variables.pkrvars.hcl ol7_base-ci.pkr.hcl`
 
 where my **variables.pkrvars.hcl** file would be something like:
 ```
