@@ -152,8 +152,20 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io",
+      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io awscli amazon-ecr-credential-helper",
       "sudo systemctl disable docker"
+    ]
+  }
+
+  provisioner "file" {
+    source      = "nomad/ecr-config.json"
+    destination = "/tmp/"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "sudo mkdir -p /root/.docker/",
+      "sudo mv /tmp/ecr-config.json /root/.docker/"
     ]
   }
 }

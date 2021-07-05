@@ -8,7 +8,9 @@ advertise_addr = "{PRIVATE_IPV4}"
 # https://www.consul.io/docs/agent/options#_client
 client_addr = "127.0.0.1 {PRIVATE_IPV4}"
 
-ui = true
+ui_config {
+  enabled = true
+}
 
 # https://learn.hashicorp.com/consul/security-networking/certificates
 # https://learn.hashicorp.com/consul/day-2-agent-authentication/update-certificates

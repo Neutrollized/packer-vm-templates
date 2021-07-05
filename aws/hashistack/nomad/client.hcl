@@ -34,10 +34,10 @@ client {
 # https://www.nomadproject.io/docs/drivers/docker.html#client-requirements
 # this will set private registry auths to use the dockercfg file
 # instead of having to pass in 'username' and 'password' in the auth stanza of your job
-#plugin "docker" {
-#  config {
-#    auth {
-#      config = "/root/.docker/config.json"
-#    }
-#  }
-#}
+plugin "docker" {
+  config {
+    auth {
+      config = "/root/.docker/ecr-config.json"
+    }
+  }
+}
