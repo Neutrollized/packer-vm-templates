@@ -8,7 +8,7 @@ variable "nomad_version" {}
 
 data "amazon-ami" "base_ami" {
   filters = {
-    name                = "docker-${var.arch}-base-*"
+    name                = "docker-amd64-base-*"
     virtualization-type = "hvm"
   }
   most_recent = true
