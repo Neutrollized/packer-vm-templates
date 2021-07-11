@@ -8,9 +8,9 @@ region = "ca-central-1"
 
 arch = "arm64"
 
-consul_version = "1.9.6"
-nomad_version  = "1.1.1"
-vault_version  = "1.7.2"
+consul_version = "1.9.7"
+nomad_version  = "1.1.2"
+vault_version  = "1.7.3"
 ```
 
 ## Nomad Client

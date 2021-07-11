@@ -8,11 +8,11 @@ variable "nomad_version" {}
 
 data "amazon-ami" "base_ami" {
   filters = {
-    name                = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+    name                = "docker-${var.arch}-base-*"
     virtualization-type = "hvm"
   }
   most_recent = true
-  owners      = ["099720109477"]
+  owners      = ["${var.owner}"]
   region      = var.region
 }
 
@@ -36,31 +36,6 @@ source "amazon-ebs" "nomad-client" {
 build {
   sources = ["sources.amazon-ebs.nomad-client"]
 
-  provisioner "shell" {
-    expect_disconnect = "true"
-    inline = [
-      "sudo apt-get update",
-      "sudo apt-get -y upgrade",
-      "sudo apt-get -y dist-upgrade",
-      "sudo apt-get -y autoremove",
-      "sudo reboot"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "sudo apt-get update",
-      "sudo apt-get -y install unzip"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "git clone https://github.com/Neutrollized/dynmotd.git",
-      "cd dynmotd && sudo ./install.sh",
-      "cd ~ && rm -Rf ./dynmotd/"
-    ]
-  }
   provisioner "shell" {
     inline = [
       "sudo addgroup --system consul",
@@ -136,24 +111,6 @@ build {
       "sudo mv /tmp/client.hcl /etc/nomad.d/",
       "sudo chown -R nomad:nomad /etc/nomad.d",
       "sudo chown -R nomad:nomad /opt/nomad"
-    ]
-  }
-
-  provisioner "shell" {
-    expect_disconnect = "true"
-    inline = [
-      "sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common",
-      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-      "sleep 15",
-      "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
-      "sudo reboot"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io awscli amazon-ecr-credential-helper",
-      "sudo systemctl disable docker"
     ]
   }
 
