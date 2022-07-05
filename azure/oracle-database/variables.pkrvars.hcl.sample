@@ -1,0 +1,10 @@
+client_id       = "ef34b162-8664-4a7e-be25-38e555302d95"
+client_secret   = "IZx1o_rxcpSyHhDGWQ7qvIT_9rK2Zka~wE"
+subscription_id = "51409898-cc6d-444b-b12b-f8363adec760"
+tenant_id       = "b5db2eee-a787-4bfa-9292-4f2bb35bf830"
+
+managed_image_rg_name = "StorageAccount-RG"
+
+oracle_version               = "18c"
+custom_managed_image_name    = "ol7_base-20210308"
+custom_managed_image_rg_name = "StorageAccount-RG"
