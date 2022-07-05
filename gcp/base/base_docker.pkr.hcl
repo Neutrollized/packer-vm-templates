@@ -4,6 +4,8 @@
 variable "project_id" {}
 variable "zone" {}
 variable "access_token" {}
+variable "arch" {}
+variable "source_image_family" {}
 variable "image_family" {}
 
 
@@ -21,10 +23,10 @@ source "googlecompute" "base-docker" {
   use_os_login = "false"
 
   # gcloud compute images list
-  source_image_family = "debian-11"
+  source_image_family = var.source_image_family
 
   image_family      = var.image_family
-  image_name        = "docker-amd64-base-${local.datestamp}"
+  image_name        = "docker-${var.arch}-base-${local.datestamp}"
   image_description = "Debian 11 image with Docker-CE installed"
 }
 
@@ -35,6 +37,7 @@ build {
     expect_disconnect = "true"
     inline = [
       "sudo apt-get update",
+      "sudo apt-get -y install dialog apt-utils",
       "sudo apt-get -y upgrade",
       "sudo apt-get -y dist-upgrade",
       "sudo apt-get -y autoremove",
@@ -45,7 +48,7 @@ build {
   provisioner "shell" {
     inline = [
       "sudo apt-get update",
-      "sudo apt-get -y install git unzip"
+      "sudo apt-get -y install git unzip wget"
     ]
   }
 

@@ -1,45 +1,48 @@
-# https://www.packer.io/docs/builders/amazon
+# https://www.packer.io/docs/builders/googlecompute
 
 # you need to declare the variables here so that it knows what to look for in the .pkrvars.hcl var file
-variable "owner" {}
-variable "region" {}
+variable "project_id" {}
+variable "zone" {}
+variable "access_token" {}
 variable "arch" {}
+variable "source_image_family" {}
+variable "image_family" {}
 variable "consul_version" {}
 
-data "amazon-ami" "base_ami" {
-  filters = {
-    name                = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-${var.arch}-server-*"
-    virtualization-type = "hvm"
-  }
-  most_recent = true
-  owners      = ["099720109477"]
-  region      = var.region
-}
 
 locals {
   # https://www.packer.io/docs/templates/hcl_templates/functions/datetime/formatdate
   datestamp = formatdate("YYYYMMDD", timestamp())
+
+  # https://www.packer.io/docs/templates/hcl_templates/functions/string/replace
+  # because GCP image name cannot have '.' in its name
+  image_consul_version = replace(var.consul_version, ".", "-")
 }
 
-source "amazon-ebs" "consul-base" {
-  ami_name      = "consul-${var.consul_version}-${var.arch}-base-${local.datestamp}"
-  instance_type = "t4g.micro"
-  region        = var.region
-  source_ami    = data.amazon-ami.base_ami.id
-  ssh_username  = "ubuntu"
+# https://www.packer.io/docs/builders/googlecompute#required
+source "googlecompute" "consul-base" {
+  project_id   = var.project_id
+  zone         = var.zone
+  machine_type = "n1-standard-1"
+  ssh_username = "packer"
+  use_os_login = "false"
 
-  tags = {
-    Dept = "engineering"
-  }
+  # use custom base image that was built
+  source_image_family = var.source_image_family
+
+  image_family      = var.image_family
+  image_name        = "consul-${local.image_consul_version}-${var.arch}-base-${local.datestamp}"
+  image_description = "Consul base image"
 }
 
 build {
-  sources = ["sources.amazon-ebs.consul-base"]
+  sources = ["sources.googlecompute.consul-base"]
 
   provisioner "shell" {
     expect_disconnect = "true"
     inline = [
       "sudo apt-get update",
+      "sudo apt-get -y install dialog apt-utils",
       "sudo apt-get -y upgrade",
       "sudo apt-get -y dist-upgrade",
       "sudo apt-get -y autoremove",
@@ -50,7 +53,7 @@ build {
   provisioner "shell" {
     inline = [
       "sudo apt-get update",
-      "sudo apt-get -y install git unzip"
+      "sudo apt-get -y install git unzip wget"
     ]
   }
 

@@ -1,3 +1,6 @@
 project_id   = "myproject-123"
 zone         = "us-central1-a"
-image_family = "my-custom-image-family"
+
+arch                = "amd64"
+source_image_family = "debian-11"
+image_family        = "my-custom-image-family"

@@ -1,0 +1,3 @@
+project_id   = "myproject-123"
+zone         = "us-central1-a"
+image_family = "my-custom-image-family"
