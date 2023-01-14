@@ -78,7 +78,8 @@ build {
       "sudo systemctl daemon-reload",
       "sudo mv /tmp/server.hcl /etc/nomad.d/",
       "sudo chown -R nomad:nomad /etc/nomad.d",
-      "sudo chown -R nomad:nomad /opt/nomad"
+      "sudo chown -R nomad:nomad /opt/nomad",
+      "sudo systemctl disable nomad.service"
     ]
   }
 }

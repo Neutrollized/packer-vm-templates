@@ -76,7 +76,8 @@ build {
       "sudo mv /tmp/consul.hcl /etc/consul.d/",
       "sudo chown -R consul:consul /etc/consul.d",
       "sudo chown -R consul:consul /opt/consul",
-      "sudo chown -R consul:consul /var/log/consul"
+      "sudo chown -R consul:consul /var/log/consul",
+      "sudo systemctl disable consul.service"
     ]
   }
 
@@ -115,7 +116,8 @@ build {
       "sudo systemctl daemon-reload",
       "sudo mv /tmp/client.hcl /etc/nomad.d/",
       "sudo chown -R nomad:nomad /etc/nomad.d",
-      "sudo chown -R nomad:nomad /opt/nomad"
+      "sudo chown -R nomad:nomad /opt/nomad",
+      "sudo systemctl disable nomad.service"
     ]
   }
 }

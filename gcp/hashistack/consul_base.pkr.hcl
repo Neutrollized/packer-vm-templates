@@ -101,7 +101,8 @@ build {
       "sudo mv /tmp/consul.hcl /etc/consul.d/",
       "sudo chown -R consul:consul /etc/consul.d",
       "sudo chown -R consul:consul /opt/consul",
-      "sudo chown -R consul:consul /var/log/consul"
+      "sudo chown -R consul:consul /var/log/consul",
+      "sudo systemctl disable consul.service"
     ]
   }
 }
