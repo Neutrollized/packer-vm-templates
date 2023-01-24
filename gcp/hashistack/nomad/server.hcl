@@ -41,5 +41,4 @@ server {
 #  enabled     = true
 #
 #  address     = "{VAULT_ADDR}"
-#  token       = "{VAULT_TOKEN_OF_NOMAD_USER}"
 #}

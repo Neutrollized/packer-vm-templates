@@ -29,15 +29,3 @@ client {
 #
 #  address = "{VAULT_ADDR}"
 #}
-
-# https://docs.aws.amazon.com/AmazonECS/latest/developerguide/private-auth-container-instances.html
-# https://www.nomadproject.io/docs/drivers/docker.html#client-requirements
-# this will set private registry auths to use the dockercfg file
-# instead of having to pass in 'username' and 'password' in the auth stanza of your job
-plugin "docker" {
-  config {
-    auth {
-      config = "/root/.docker/ecr-config.json"
-    }
-  }
-}
