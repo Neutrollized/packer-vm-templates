@@ -73,6 +73,7 @@ build {
   }
 
   provisioner "shell" {
+    expect_disconnect = "true"
     inline = [
       "echo '=============================================='",
       "echo 'INSTALL DOCKER'",

@@ -4,10 +4,10 @@ on:
   push:
 
 env:
-  PRODUCT_VERSION: "1.8.7" # or: "latest"
+  PRODUCT_VERSION: "1.9.0" # or: "latest"
 
 jobs:
-  packer:
+  packer-docker-base:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -15,26 +15,132 @@ jobs:
 
     name: Run Packer
     steps:
-
       - name: Checkout
         uses: actions/checkout@v3
-
       - name: 'Authenticate to Google Cloud'
         id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
-
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
         id: setup
         with:
           version: ${{ env.PRODUCT_VERSION }}
-
       - name: Run `packer init`
         id: init
         run: "packer init ./base_docker.pkr.hcl"
-
       - name: Run `packer build`
         id: build
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables.pkrvars.hcl ./base_docker.pkr.hcl"
+
+  packer-consul-base:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./gcp/hashistack
+
+    name: Run Packer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
+      - name: Run `packer init`
+        id: init
+        run: "packer init ./consul_base.pkr.hcl"
+      - name: Run `packer build`
+        id: build
+        run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_consul_base.pkrvars.hcl ./consul_base.pkr.hcl"
+
+  packer-consul-server:
+    needs: packer-consul-base
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./gcp/hashistack
+
+    name: Run Packer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
+      - name: Run `packer init`
+        id: init
+        run: "packer init ./consul_server.pkr.hcl"
+      - name: Run `packer build`
+        id: build
+        run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_consul_server.pkrvars.hcl ./consul_server.pkr.hcl"
+
+  packer-nomad-server:
+    needs: packer-docker-base
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./gcp/hashistack
+
+    name: Run Packer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
+      - name: Run `packer init`
+        id: init
+        run: "packer init ./nomad_client.pkr.hcl"
+      - name: Run `packer build`
+        id: build
+        run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_nomad_client.pkrvars.hcl ./nomad_client.pkr.hcl"
+
+  packer-nomad-server:
+    needs: packer-consul-base
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./gcp/hashistack
+
+    name: Run Packer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: ${{ env.PRODUCT_VERSION }}
+      - name: Run `packer init`
+        id: init
+        run: "packer init ./nomad_server.pkr.hcl"
+      - name: Run `packer build`
+        id: build
+        run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_nomad_server.pkrvars.hcl ./nomad_server.pkr.hcl"
