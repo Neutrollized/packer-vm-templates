@@ -3,7 +3,6 @@
 # you need to declare the variables here so that it knows what to look for in the .pkrvars.hcl var file
 variable "project_id" {}
 variable "zone" {}
-variable "access_token" {}
 variable "arch" {}
 variable "source_image_family" {}
 variable "image_family" {}
@@ -33,6 +32,8 @@ source "googlecompute" "nomad-server" {
   image_family      = var.image_family
   image_name        = "nomad-${local.image_nomad_version}-${var.arch}-server-${local.datestamp}"
   image_description = "Nomad server image"
+
+  tags = ["packer"]
 }
 
 build {
@@ -40,15 +41,16 @@ build {
 
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'CREATE NOMAD USER & GROUP'",
+      "echo '=============================================='",
       "sudo addgroup --system nomad",
       "sudo adduser --system --ingroup nomad nomad",
       "sudo mkdir -p /etc/nomad.d",
-      "sudo mkdir -p /opt/nomad"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
+      "sudo mkdir -p /opt/nomad",
+      "echo '=============================================='",
+      "echo 'DOWNLOAD NOMAD'",
+      "echo '=============================================='",
       "wget https://releases.hashicorp.com/nomad/${var.nomad_version}/nomad_${var.nomad_version}_linux_${var.arch}.zip",
       "unzip nomad_${var.nomad_version}_linux_${var.arch}.zip",
       "sudo mv nomad /usr/local/bin/",
@@ -73,6 +75,9 @@ build {
 
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'SETUP NOMAD SERVER'",
+      "echo '=============================================='",
       "sudo mv /tmp/20_services_check.sh /etc/dynmotd.d/",
       "sudo mv /tmp/nomad.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",

@@ -23,7 +23,6 @@ jobs:
         id: 'auth'
         uses: 'google-github-actions/auth@v1'
         with:
-#          work
           credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
 
       - name: Setup `packer`
@@ -36,10 +35,6 @@ jobs:
         id: init
         run: "packer init ./base_docker.pkr.hcl"
 
-      - name: DEBUG
-        id: debug
-        run: "ls -l"
-
       - name: Run `packer build`
         id: build
-        run: "packer build -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables.pkrvars.hcl ./base_docker.pkr.hcl"
+        run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables.pkrvars.hcl ./base_docker.pkr.hcl"

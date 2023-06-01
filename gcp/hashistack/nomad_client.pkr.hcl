@@ -3,7 +3,6 @@
 # you need to declare the variables here so that it knows what to look for in the .pkrvars.hcl var file
 variable "project_id" {}
 variable "zone" {}
-variable "access_token" {}
 variable "arch" {}
 variable "source_image_family" {}
 variable "image_family" {}
@@ -34,24 +33,26 @@ source "googlecompute" "nomad-client" {
   image_family      = var.image_family
   image_name        = "nomad-${local.image_nomad_version}-${var.arch}-client-${local.datestamp}"
   image_description = "Nomad client image"
+
+  tags = ["packer"]
 }
 
 build {
   sources = ["sources.googlecompute.nomad-client"]
 
-  # install Consul agent
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'CREATE CONSUL USER & GROUP'",
+      "echo '=============================================='",
       "sudo addgroup --system consul",
       "sudo adduser --system --ingroup consul consul",
       "sudo mkdir -p /etc/consul.d",
       "sudo mkdir -p /opt/consul",
-      "sudo mkdir -p /var/log/consul"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
+      "sudo mkdir -p /var/log/consul",
+      "echo '=============================================='",
+      "echo 'DOWNLOAD CONSUL'",
+      "echo '=============================================='",
       "wget https://releases.hashicorp.com/consul/${var.consul_version}/consul_${var.consul_version}_linux_${var.arch}.zip",
       "unzip consul_${var.consul_version}_linux_${var.arch}.zip",
       "sudo mv consul /usr/local/bin/",
@@ -71,6 +72,9 @@ build {
 
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'SETUP CONSUL CLIENT'",
+      "echo '=============================================='",
       "sudo mv /tmp/consul.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",
       "sudo mv /tmp/consul.hcl /etc/consul.d/",
@@ -81,18 +85,18 @@ build {
     ]
   }
 
-  # install Nomad client
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'CREATE NOMAD USER & GROUP'",
+      "echo '=============================================='",
       "sudo addgroup --system nomad",
       "sudo adduser --system --ingroup nomad nomad",
       "sudo mkdir -p /etc/nomad.d",
-      "sudo mkdir -p /opt/nomad"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
+      "sudo mkdir -p /opt/nomad",
+      "echo '=============================================='",
+      "echo 'DOWNLOAD NOMAD'",
+      "echo '=============================================='",
       "wget https://releases.hashicorp.com/nomad/${var.nomad_version}/nomad_${var.nomad_version}_linux_${var.arch}.zip",
       "unzip nomad_${var.nomad_version}_linux_${var.arch}.zip",
       "sudo mv nomad /usr/local/bin/",
@@ -112,6 +116,9 @@ build {
 
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'SETUP NOMAD CLIENT'",
+      "echo '=============================================='",
       "sudo mv /tmp/nomad.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",
       "sudo mv /tmp/client.hcl /etc/nomad.d/",

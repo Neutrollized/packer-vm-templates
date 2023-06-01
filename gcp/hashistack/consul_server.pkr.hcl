@@ -3,7 +3,6 @@
 # you need to declare the variables here so that it knows what to look for in the .pkrvars.hcl var file
 variable "project_id" {}
 variable "zone" {}
-variable "access_token" {}
 variable "arch" {}
 variable "source_image_family" {}
 variable "image_family" {}
@@ -33,6 +32,8 @@ source "googlecompute" "consul-server" {
   image_family      = var.image_family
   image_name        = "consul-${local.image_consul_version}-${var.arch}-server-${local.datestamp}"
   image_description = "Consul server image"
+
+  tags = ["packer"]
 }
 
 build {
@@ -50,6 +51,9 @@ build {
 
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'SETUP CONSUL SERVER'",
+      "echo '=============================================='",
       "sudo mv /tmp/20_services_check.sh /etc/dynmotd.d/",
       "sudo mv /tmp/server.hcl /etc/consul.d/",
       "sudo chown -R consul:consul /etc/consul.d"

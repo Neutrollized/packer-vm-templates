@@ -3,7 +3,6 @@
 # you need to declare the variables here so that it knows what to look for in the .pkrvars.hcl var file
 variable "project_id" {}
 variable "zone" {}
-variable "access_token" {}
 variable "arch" {}
 variable "source_image_family" {}
 variable "image_family" {}
@@ -33,6 +32,8 @@ source "googlecompute" "consul-base" {
   image_family      = var.image_family
   image_name        = "consul-${local.image_consul_version}-${var.arch}-base-${local.datestamp}"
   image_description = "Consul base image"
+
+  tags = ["packer"]
 }
 
 build {
@@ -41,8 +42,12 @@ build {
   provisioner "shell" {
     expect_disconnect = "true"
     inline = [
+      "echo '=============================================='",
+      "echo 'APT INSTALL PACKAGES & UPDATES'",
+      "echo '=============================================='",
+      "export DEBIAN_FRONTEND=noninteractive",
       "sudo apt-get update",
-      "sudo apt-get -y install dialog apt-utils",
+      "sudo apt-get -y install apt-utils git unzip wget",
       "sudo apt-get -y upgrade",
       "sudo apt-get -y dist-upgrade",
       "sudo apt-get -y autoremove",
@@ -52,13 +57,9 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sudo apt-get update",
-      "sudo apt-get -y install git unzip wget"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
+      "echo '=============================================='",
+      "echo 'INSTALL DYNMOTD'",
+      "echo '=============================================='",
       "git clone https://github.com/Neutrollized/dynmotd.git",
       "cd dynmotd && sudo ./install.sh",
       "cd ~ && rm -Rf ./dynmotd/"
@@ -67,16 +68,17 @@ build {
 
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'CREATE CONSUL USER & GROUP'",
+      "echo '=============================================='",
       "sudo addgroup --system consul",
       "sudo adduser --system --ingroup consul consul",
       "sudo mkdir -p /etc/consul.d",
       "sudo mkdir -p /opt/consul",
-      "sudo mkdir -p /var/log/consul"
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
+      "sudo mkdir -p /var/log/consul",
+      "echo '=============================================='",
+      "echo 'DOWNLOAD CONSUL'",
+      "echo '=============================================='",
       "wget https://releases.hashicorp.com/consul/${var.consul_version}/consul_${var.consul_version}_linux_${var.arch}.zip",
       "unzip consul_${var.consul_version}_linux_${var.arch}.zip",
       "sudo mv consul /usr/local/bin/",
@@ -96,6 +98,9 @@ build {
 
   provisioner "shell" {
     inline = [
+      "echo '=============================================='",
+      "echo 'SETUP CONSUL'",
+      "echo '=============================================='",
       "sudo mv /tmp/consul.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",
       "sudo mv /tmp/consul.hcl /etc/consul.d/",
