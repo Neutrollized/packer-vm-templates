@@ -89,7 +89,7 @@ jobs:
         id: build
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_consul_server.pkrvars.hcl ./consul_server.pkr.hcl"
 
-  packer-nomad-server:
+  packer-nomad-client:
     needs: packer-docker-base
     runs-on: ubuntu-latest
     defaults:
