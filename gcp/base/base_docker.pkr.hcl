@@ -3,7 +3,6 @@
 # you need to declare the variables here so that it knows what to look for in the .pkrvars.hcl var file
 variable "project_id" {}
 variable "zone" {}
-variable "access_token" {}
 variable "arch" {}
 variable "source_image_family" {}
 variable "image_family" {}
