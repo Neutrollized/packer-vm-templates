@@ -15,14 +15,16 @@ jobs:
 
     name: Run Packer
     steps:
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v0'
-        with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
 
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: 'Authenticate to Google Cloud'
+        id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+#          work
+          credentials_json: '${{ secrets.GCP_CREDENTIALS_JSON }}'
 
       - name: Setup `packer`
         uses: hashicorp/setup-packer@main
@@ -34,6 +36,10 @@ jobs:
         id: init
         run: "packer init ./base_docker.pkr.hcl"
 
+      - name: DEBUG
+        id: debug
+        run: "ls -l"
+
       - name: Run `packer build`
-        id: validate
+        id: build
         run: "packer build -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables.pkrvars.hcl ./base_docker.pkr.hcl"
