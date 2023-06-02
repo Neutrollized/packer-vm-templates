@@ -22,7 +22,7 @@ locals {
 source "googlecompute" "consul-base" {
   project_id   = var.project_id
   zone         = var.zone
-  machine_type = "n1-standard-1"
+  machine_type = "n1-standard-2"
   ssh_username = "packer"
   use_os_login = "false"
 
@@ -45,9 +45,8 @@ build {
       "echo '=============================================='",
       "echo 'APT INSTALL PACKAGES & UPDATES'",
       "echo '=============================================='",
-      "export DEBIAN_FRONTEND=noninteractive",
       "sudo apt-get update",
-      "sudo apt-get -y install apt-utils git unzip wget",
+      "sudo apt-get -y install --no-install-recommends apt-utils git unzip wget",
       "sudo apt-get -y upgrade",
       "sudo apt-get -y dist-upgrade",
       "sudo apt-get -y autoremove",
@@ -64,6 +63,7 @@ build {
       "cd dynmotd && sudo ./install.sh",
       "cd ~ && rm -Rf ./dynmotd/"
     ]
+    pause_before = "10s"
   }
 
   provisioner "shell" {
@@ -75,7 +75,12 @@ build {
       "sudo adduser --system --ingroup consul consul",
       "sudo mkdir -p /etc/consul.d",
       "sudo mkdir -p /opt/consul",
-      "sudo mkdir -p /var/log/consul",
+      "sudo mkdir -p /var/log/consul"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
       "echo '=============================================='",
       "echo 'DOWNLOAD CONSUL'",
       "echo '=============================================='",
@@ -84,6 +89,7 @@ build {
       "sudo mv consul /usr/local/bin/",
       "rm consul_${var.consul_version}_linux_${var.arch}.zip"
     ]
+    max_retries = 3
   }
 
   provisioner "file" {
@@ -97,7 +103,6 @@ build {
   }
 
   provisioner "shell" {
-    expect_disconnect = "true"
     inline = [
       "echo '=============================================='",
       "echo 'SETUP CONSUL'",
@@ -109,6 +114,17 @@ build {
       "sudo chown -R consul:consul /opt/consul",
       "sudo chown -R consul:consul /var/log/consul",
       "sudo systemctl disable consul.service"
+    ]
+  }
+
+  provisioner "shell" {
+    expect_disconnect = "true"
+    inline = [
+      "which consul",
+      "sudo apt-get clean",
+      "echo '=============================================='",
+      "echo 'BUILD COMPLETE'",
+      "echo '=============================================='"
     ]
   }
 }

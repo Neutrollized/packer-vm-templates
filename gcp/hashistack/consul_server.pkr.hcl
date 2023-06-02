@@ -22,7 +22,7 @@ locals {
 source "googlecompute" "consul-server" {
   project_id   = var.project_id
   zone         = var.zone
-  machine_type = "n1-standard-1"
+  machine_type = "n1-standard-2"
   ssh_username = "packer"
   use_os_login = "false"
 
@@ -50,7 +50,6 @@ build {
   }
 
   provisioner "shell" {
-    expect_disconnect = "true"
     inline = [
       "echo '=============================================='",
       "echo 'SETUP CONSUL SERVER'",
@@ -58,6 +57,16 @@ build {
       "sudo mv /tmp/20_services_check.sh /etc/dynmotd.d/",
       "sudo mv /tmp/server.hcl /etc/consul.d/",
       "sudo chown -R consul:consul /etc/consul.d"
+    ]
+  }
+
+  provisioner "shell" {
+    expect_disconnect = "true"
+    inline = [
+      "which consul",
+      "echo '=============================================='",
+      "echo 'BUILD COMPLETE'",
+      "echo '=============================================='"
     ]
   }
 }

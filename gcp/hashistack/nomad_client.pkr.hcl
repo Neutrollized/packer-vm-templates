@@ -23,7 +23,7 @@ locals {
 source "googlecompute" "nomad-client" {
   project_id   = var.project_id
   zone         = var.zone
-  machine_type = "n1-standard-1"
+  machine_type = "n1-standard-2"
   ssh_username = "packer"
   use_os_login = "false"
 
@@ -49,7 +49,12 @@ build {
       "sudo adduser --system --ingroup consul consul",
       "sudo mkdir -p /etc/consul.d",
       "sudo mkdir -p /opt/consul",
-      "sudo mkdir -p /var/log/consul",
+      "sudo mkdir -p /var/log/consul"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
       "echo '=============================================='",
       "echo 'DOWNLOAD CONSUL'",
       "echo '=============================================='",
@@ -58,6 +63,7 @@ build {
       "sudo mv consul /usr/local/bin/",
       "rm consul_${var.consul_version}_linux_${var.arch}.zip"
     ]
+    max_retries = 3
   }
 
   provisioner "file" {
@@ -93,7 +99,12 @@ build {
       "sudo addgroup --system nomad",
       "sudo adduser --system --ingroup nomad nomad",
       "sudo mkdir -p /etc/nomad.d",
-      "sudo mkdir -p /opt/nomad",
+      "sudo mkdir -p /opt/nomad"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
       "echo '=============================================='",
       "echo 'DOWNLOAD NOMAD'",
       "echo '=============================================='",
@@ -102,6 +113,7 @@ build {
       "sudo mv nomad /usr/local/bin/",
       "rm nomad_${var.nomad_version}_linux_${var.arch}.zip"
     ]
+    max_retries = 3
   }
 
   provisioner "file" {
@@ -115,7 +127,6 @@ build {
   }
 
   provisioner "shell" {
-    expect_disconnect = "true"
     inline = [
       "echo '=============================================='",
       "echo 'SETUP NOMAD CLIENT'",
@@ -126,6 +137,18 @@ build {
       "sudo chown -R nomad:nomad /etc/nomad.d",
       "sudo chown -R nomad:nomad /opt/nomad",
       "sudo systemctl disable nomad.service"
+    ]
+  }
+
+  provisioner "shell" {
+    expect_disconnect = "true"
+    inline = [
+      "which docker",
+      "which consul",
+      "which nomad",
+      "echo '=============================================='",
+      "echo 'BUILD COMPLETE'",
+      "echo '=============================================='"
     ]
   }
 }

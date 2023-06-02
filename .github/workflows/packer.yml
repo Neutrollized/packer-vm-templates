@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  PRODUCT_VERSION: "1.9.0" # or: "latest"
+  PRODUCT_VERSION: "1.9.1" # or: "latest"
 
 jobs:
   packer-docker-base:
@@ -34,6 +34,7 @@ jobs:
         id: build
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables.pkrvars.hcl ./base_docker.pkr.hcl"
 
+
   packer-consul-base:
     name: Build Consul Base
     runs-on: ubuntu-latest
@@ -60,6 +61,7 @@ jobs:
       - name: Run `packer build`
         id: build
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_consul_base.pkrvars.hcl ./consul_base.pkr.hcl"
+
 
   packer-consul-server:
     name: Build Consul SERVER
@@ -89,6 +91,7 @@ jobs:
         id: build
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_consul_server.pkrvars.hcl ./consul_server.pkr.hcl"
 
+
   packer-nomad-client:
     name: Build Nomad WORKER
     needs: packer-docker-base
@@ -116,6 +119,7 @@ jobs:
       - name: Run `packer build`
         id: build
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_nomad_client.pkrvars.hcl ./nomad_client.pkr.hcl"
+
 
   packer-nomad-server:
     name: Build Nomad SERVER

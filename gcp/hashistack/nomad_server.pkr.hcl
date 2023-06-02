@@ -22,7 +22,7 @@ locals {
 source "googlecompute" "nomad-server" {
   project_id   = var.project_id
   zone         = var.zone
-  machine_type = "n1-standard-1"
+  machine_type = "n1-standard-2"
   ssh_username = "packer"
   use_os_login = "false"
 
@@ -47,7 +47,12 @@ build {
       "sudo addgroup --system nomad",
       "sudo adduser --system --ingroup nomad nomad",
       "sudo mkdir -p /etc/nomad.d",
-      "sudo mkdir -p /opt/nomad",
+      "sudo mkdir -p /opt/nomad"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
       "echo '=============================================='",
       "echo 'DOWNLOAD NOMAD'",
       "echo '=============================================='",
@@ -56,6 +61,7 @@ build {
       "sudo mv nomad /usr/local/bin/",
       "rm nomad_${var.nomad_version}_linux_${var.arch}.zip"
     ]
+    max_retries = 3
   }
 
   provisioner "file" {
@@ -74,7 +80,6 @@ build {
   }
 
   provisioner "shell" {
-    expect_disconnect = "true"
     inline = [
       "echo '=============================================='",
       "echo 'SETUP NOMAD SERVER'",
@@ -86,6 +91,17 @@ build {
       "sudo chown -R nomad:nomad /etc/nomad.d",
       "sudo chown -R nomad:nomad /opt/nomad",
       "sudo systemctl disable nomad.service"
+    ]
+  }
+
+  provisioner "shell" {
+    expect_disconnect = "true"
+    inline = [
+      "which consul",
+      "which nomad",
+      "echo '=============================================='",
+      "echo 'BUILD COMPLETE'",
+      "echo '=============================================='"
     ]
   }
 }
