@@ -39,17 +39,20 @@ source "googlecompute" "consul-base" {
 build {
   sources = ["sources.googlecompute.consul-base"]
 
+  # https://discuss.hashicorp.com/t/how-to-fix-debconf-unable-to-initialize-frontend-dialog-error/39201/2
   provisioner "shell" {
     expect_disconnect = "true"
     inline = [
       "echo '=============================================='",
       "echo 'APT INSTALL PACKAGES & UPDATES'",
       "echo '=============================================='",
+      "echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections",
       "sudo apt-get update",
       "sudo apt-get -y install --no-install-recommends apt-utils git unzip wget",
       "sudo apt-get -y upgrade",
       "sudo apt-get -y dist-upgrade",
       "sudo apt-get -y autoremove",
+      "echo 'Rebooting...'",
       "sudo reboot"
     ]
   }
