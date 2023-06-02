@@ -8,12 +8,12 @@ env:
 
 jobs:
   packer-docker-base:
+    name: Build Docker Base
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./gcp/base
 
-    name: Run Packer
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -35,12 +35,12 @@ jobs:
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables.pkrvars.hcl ./base_docker.pkr.hcl"
 
   packer-consul-base:
+    name: Build Consul Base
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./gcp/hashistack
 
-    name: Run Packer
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -62,13 +62,13 @@ jobs:
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_consul_base.pkrvars.hcl ./consul_base.pkr.hcl"
 
   packer-consul-server:
+    name: Build Consul SERVER
     needs: packer-consul-base
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./gcp/hashistack
 
-    name: Run Packer
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -90,13 +90,13 @@ jobs:
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_consul_server.pkrvars.hcl ./consul_server.pkr.hcl"
 
   packer-nomad-client:
+    name: Build Nomad WORKER
     needs: packer-docker-base
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./gcp/hashistack
 
-    name: Run Packer
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -118,13 +118,13 @@ jobs:
         run: "packer build -force -var 'project_id=${{ secrets.GCP_PROJECT_ID }}' -var-file=variables_nomad_client.pkrvars.hcl ./nomad_client.pkr.hcl"
 
   packer-nomad-server:
+    name: Build Nomad SERVER
     needs: packer-consul-base
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./gcp/hashistack
 
-    name: Run Packer
     steps:
       - name: Checkout
         uses: actions/checkout@v3

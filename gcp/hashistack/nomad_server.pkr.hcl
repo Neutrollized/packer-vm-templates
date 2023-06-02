@@ -74,6 +74,7 @@ build {
   }
 
   provisioner "shell" {
+    expect_disconnect = "true"
     inline = [
       "echo '=============================================='",
       "echo 'SETUP NOMAD SERVER'",
