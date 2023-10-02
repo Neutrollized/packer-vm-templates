@@ -1,9 +1,11 @@
 # /etc/consul.d/consul.hcl
 log_level = "INFO"
 
-datacenter =  "{CLOUD}-{ENV}-{REGION}"
+datacenter =  "{DATACENTER}"
 
 data_dir = "/opt/consul"
+
+bind_addr = "{PRIVATE_IPV4}"
 
 # https://www.consul.io/docs/agent/encryption.html
 encrypt = "{GOSSIP_KEY}"

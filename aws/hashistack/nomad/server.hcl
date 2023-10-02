@@ -8,7 +8,7 @@ advertise {
 
 # default region is "global"
 # Nomad will identify your server nodes as HOSTNAME.region
-datacenter = "{CLOUD}-{ENV}"
+datacenter = "{DATACENTER}"
 region = "{REGION}"
 
 # Increase log verbosity

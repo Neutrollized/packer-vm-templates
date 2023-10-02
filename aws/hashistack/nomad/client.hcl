@@ -1,7 +1,7 @@
 # /etc/nomad.d/client.hcl
 # this requires consul to be running as it finds the Nomad servers via service discovery
 
-datacenter = "{CLOUD}-{ENV}"
+datacenter = "{DATACENTER}"
 region = "{REGION}"
 
 # Increase log verbosity

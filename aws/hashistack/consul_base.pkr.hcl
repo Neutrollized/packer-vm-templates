@@ -78,7 +78,7 @@ build {
       "echo '=============================================='",
       "sudo addgroup --system consul",
       "sudo adduser --system --ingroup consul consul",
-      "sudo mkdir -p /etc/consul.d",
+      "sudo mkdir -p /etc/consul.d/ssl",
       "sudo mkdir -p /opt/consul",
       "sudo mkdir -p /var/log/consul"
     ]
@@ -107,6 +107,11 @@ build {
     destination = "/tmp/"
   }
 
+  provisioner "file" {
+    source      = "consul/client.hcl"
+    destination = "/tmp/"
+  }
+
   provisioner "shell" {
     inline = [
       "echo '=============================================='",
@@ -115,9 +120,11 @@ build {
       "sudo mv /tmp/consul.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",
       "sudo mv /tmp/consul.hcl /etc/consul.d/",
+      "sudo mv /tmp/client.hcl /etc/consul.d/",
       "sudo chown -R consul:consul /etc/consul.d",
       "sudo chown -R consul:consul /opt/consul",
-      "sudo chown -R consul:consul /var/log/consul"
+      "sudo chown -R consul:consul /var/log/consul",
+      "sudo chmod 750 /etc/consul.d/ssl"
     ]
   }
 

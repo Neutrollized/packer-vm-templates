@@ -51,7 +51,7 @@ build {
       "echo '=============================================='",
       "sudo addgroup --system consul",
       "sudo adduser --system --ingroup consul consul",
-      "sudo mkdir -p /etc/consul.d",
+      "sudo mkdir -p /etc/consul.d/ssl",
       "sudo mkdir -p /opt/consul",
       "sudo mkdir -p /var/log/consul"
     ]
@@ -101,7 +101,7 @@ build {
       "echo '=============================================='",
       "sudo addgroup --system nomad",
       "sudo adduser --system --ingroup nomad nomad",
-      "sudo mkdir -p /etc/nomad.d",
+      "sudo mkdir -p /etc/nomad.d/ssl",
       "sudo mkdir -p /opt/nomad"
     ]
   }
@@ -137,7 +137,8 @@ build {
       "sudo systemctl daemon-reload",
       "sudo mv /tmp/client.hcl /etc/nomad.d/",
       "sudo chown -R nomad:nomad /etc/nomad.d",
-      "sudo chown -R nomad:nomad /opt/nomad"
+      "sudo chown -R nomad:nomad /opt/nomad",
+      "sudo chmod 750 /etc/nomad.d/ssl"
     ]
   }
 
