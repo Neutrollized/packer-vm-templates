@@ -80,6 +80,11 @@ build {
     destination = "/tmp/"
   }
 
+  provisioner "file" {
+    source      = "consul/client.hcl"
+    destination = "/tmp/"
+  }
+
   provisioner "shell" {
     inline = [
       "echo '=============================================='",
@@ -88,6 +93,7 @@ build {
       "sudo mv /tmp/consul.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",
       "sudo mv /tmp/consul.hcl /etc/consul.d/",
+      "sudo mv /tmp/client.hcl /etc/consul.d/",
       "sudo chown -R consul:consul /etc/consul.d",
       "sudo chown -R consul:consul /opt/consul",
       "sudo chown -R consul:consul /var/log/consul"
@@ -158,6 +164,24 @@ build {
       "sudo mkdir -p /root/.docker/",
       "sudo mv /tmp/ecr-config.json /root/.docker/"
     ]
+  }
+
+  provisioner "file" {
+    source      = "nomad/bridge.conf"
+    destination = "/tmp/"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "echo '=============================================='",
+      "echo 'INSTALL CNI PLUGINS'",
+      "echo '=============================================='",
+      "curl -L -o /tmp/cni-plugins.tgz \"https://github.com/containernetworking/plugins/releases/download/v1.0.0/cni-plugins-linux-$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)\"-v1.0.0.tgz",
+      "sudo mkdir -p /opt/cni/bin",
+      "sudo tar -C /opt/cni/bin -xzf /tmp/cni-plugins.tgz",
+      "sudo mv /tmp/bridge.conf /etc/sysctl.d/"
+    ]
+    max_retries = 3
   }
 
   provisioner "shell" {
