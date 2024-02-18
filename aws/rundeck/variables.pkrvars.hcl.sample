@@ -1,0 +1,11 @@
+owner  = "1234567890"
+region = "ca-central-1"
+
+# Rundeck depends on Java 11 (recommended) or 8
+java_package = "openjdk-11-jre-headless"
+
+# `apt list -a rundeck` to list all avail versions after adding apt repo
+#rundeck_version = "2.11.14"
+#rundeck_version = "3.4.10.20220118-1"
+rundeck_version = "4.17.4.20231216-1"
+rundeck_docker_plugin_version = "1.4.7"

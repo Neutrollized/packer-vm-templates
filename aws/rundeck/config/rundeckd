@@ -1,0 +1,4 @@
+JAAS_CONF=/etc/rundeck/jaas-multiauth.conf
+LOGIN_MODULE=multiauth
+RDECK_JVM_OPTS="$RDECK_JVM_OPTS -Dcom.dtolabs.rundeck.jetty.jaas.LEVEL=DEBUG"
+RDECK_JVM_OPTS="-Dserver.session.timeout=3600 -Dserver.port=8080 -Drundeck.jetty.connector.forwarded=true"
